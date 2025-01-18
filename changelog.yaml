@@ -1,0 +1,120 @@
+1.14:
+  date: "2025-01-2"
+  changes:
+    - "Allow multiple items to be bought/sold in market"
+    - "Add give command"
+    - "Add collectables for jobs"
+1.13.0:
+  date: "2025-01-1"
+  changes:
+    - "redid detection system"
+    - "use group commands"
+    - "refactor code"
+    - "use embed for coins/levels"
+1.12.0:
+  date: "2024-12-19"
+  changes:
+    - "Added jobs"
+1.11.2:
+  date: "2024-12-16"
+  changes:
+    - "Small tweaks to gambling"
+    - "Add tax to selling stocks"
+    - "Fix tax for tycoon"
+1.11.1:
+  date: "2024-12-13"
+  changes:
+    - "Cleaned up code"
+    - "Fixed bugs"
+    - "Added admin commands"
+    - "Show change to stocks in portfolio"
+    - "Add alias"
+    - "Add tax to tycoon"
+1.11.0:
+  date: "2024-12-11"
+  changes:
+    - "Fixed various bugs"
+    - "Added super saiyan mode"
+1.10.0:
+  date: "2024-12-9"
+  changes:
+    - "Fixed various bugs"
+    - "Added rob cooldown and protection"
+    - "Add connect 4"
+1.9.0:
+  date: "2024-12-9"
+  changes:
+    - "Added slot machine"
+    - "Added farms"
+    - "Added buffs"
+1.8.1:
+  date: "2024-12-8"
+  changes:
+    - "Added all parameter"
+    - "Fixed stocks"
+1.8.0:
+  date: "2024-12-8"
+  changes:
+    - "Added investing commands"
+    - "Made heist steal slaves, farms and mines"
+    - "Add level check to item use command"
+1.7.0:
+  date: "2024-12-5"
+  changes:
+    - "Add level system to use command for tycoon items"
+1.6.0:
+  date: "2024-12-5"
+  changes:
+    - "Added farms and mines"
+    - "Made gambling use global bank"
+1.5.0:
+  date: "2024-12-5"
+  changes:
+    - "Added blackjack"
+1.4.1:
+  date: "2024-12-4"
+  changes:
+    - "Add snake eyes"
+    - "Fixes to heist"
+1.3.1:
+  date: "2024-12-4"
+  changes:
+    - "Fixed bug for heist"
+    - "Made use command more faster"
+    - "Added functionlity to phone item"
+1.3.0:
+  date: "2024-12-4"
+  changes:
+    - "Added heist command"
+1.2.2:
+  date: "2024-12-4"
+  changes:
+    - "Fixed bug for leaderboards"
+    - "Made buy and use command faster"
+1.2.1:
+  date: "2024-11-19"
+  changes:
+    - "Made rob harder"
+    - "Add amount argument to use command"
+    - "Modify response message for buy and use"
+1.2.0:
+  date: "2024-11-19"
+  changes:
+    - "Added global market"
+    - "Made rob easier"
+    - "Add amount argument to buy command"
+1.1.1:
+  date: "2024-11-18"
+  changes:
+    - "Fixed bug for changelog"
+    - "Made guns sellable"
+1.1.0:
+  date: "2024-11-17"
+  changes:
+    - "Added changelog"
+    - "Redid multiplier"
+    - "Shop now adjusts for inflation"
+1.0.0:
+  date: "2024-11-12"
+  changes:
+    - "Initial release"

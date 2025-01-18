@@ -1,0 +1,9 @@
+.env
+creds.txt
+link.txt
+aws.txt
+__pycache__/
+*.py[cod]
+*.old
+myenv
+env
