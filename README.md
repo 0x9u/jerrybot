@@ -1,4 +1,4 @@
-# wordbot
+# Jerrybot
 
 New repository as commit history was messy.
 
