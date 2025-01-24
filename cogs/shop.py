@@ -16,6 +16,8 @@ class Shop(commands.Cog):
     @shop_group.command(name="list", description="Display the shop.")
     async def list(self, interaction: discord.Interaction):
         await interaction.response.defer()
+        
+        # todo: optimise this, needs to be faster
 
         data = []
         for item in await database.db.get_items_shop():
