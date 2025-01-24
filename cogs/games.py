@@ -33,8 +33,6 @@ class Games(commands.Cog):
         
         bet = parsed_amount.value if parsed_amount.value != "all" else await database.db.get_user_coins(user_id)
 
-
-
         if await database.db.get_user_coins(user_id) < bet:
             await interaction.followup.send("You don't have enough coins to play Connect 4.")
             return
