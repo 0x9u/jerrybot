@@ -41,5 +41,6 @@ def get_jerrymon_move_category(jerrymon_move_category: int) -> str | None:
 def calculate_jerrymon_max_xp(jerrymon_level: int) -> int:
     return JERRYMON_BASE_XP * (JERRYMON_XP_GROWTH_RATE ** (jerrymon_level - 1))
 
-def calculate_damage(jerrymon_attack: int, move_power: int,  opponent_defense: int):
-    pass
+def jerrymon_calculate_damage(jerrymon_attack: int, move_power: int,  opponent_defense: int) -> int:
+    damage = ((2 * jerrymon_attack * move_power / opponent_defense) / 50) + 2
+    return int(damage)

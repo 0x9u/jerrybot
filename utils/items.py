@@ -129,6 +129,9 @@ class ItemCode(Enum):
     RIOT_SHIELD = 86
     GOLDEN_SHERIFFS_BADGE = 87
     MEDAL_OF_VALOR = 88
+    
+    # Jerrymon
+    JERRYMON_BALL = 89
 
 
 loot_table_guns = {

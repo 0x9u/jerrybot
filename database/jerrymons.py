@@ -25,11 +25,11 @@ class JerrymonsDB(CoreDB):
 
     async def get_jerrymon_inventory_by_id(self, user_id: str, id: int):
         jerrymon = await self.supabase.table("jerrymons_inventory").select("*").eq("user_id", user_id).eq("id", id).execute()
-        return jerrymon.data if len(jerrymon.data) > 0 else None
+        return jerrymon.data[0] if len(jerrymon.data) > 0 else None
 
     async def get_jerrymon_inventory_by_nickname(self, user_id: str, nickname: str):
         jerrymon = await self.supabase.table("jerrymons_inventory").select("*").eq("user_id", user_id).eq("nickname", nickname).execute()
-        return jerrymon.data if len(jerrymon.data) > 0 else None
+        return jerrymon.data[0] if len(jerrymon.data) > 0 else None
 
     async def get_jerrymon_known_moves(self, jerrymon_inventory_id: int):
         return await self.supabase.table("jerrymons_known_moves").select("*, jerrymons_moves(*)").eq("jerrymon_inventory_id", jerrymon_inventory_id).execute().data
@@ -52,11 +52,12 @@ class JerrymonsDB(CoreDB):
     async def get_random_jerrymon(self):
         return await self.supabase.rpc("get_random_jerrymon").execute().data[0]
 
-    async def add_jerrymon_to_inventory(self, user_id: str, jerrymon_id: int):
+    async def add_jerrymon_to_inventory(self, user_id: str, jerrymon_id: int) -> int:
         # adds default move to jerrymon too
+        # returns id of newly created
         return await self.supabase.rpc("add_jerrymon_to_inventory", {"p_user_id": user_id, "p_jerrymon_id": jerrymon_id}).execute()
 
-    async def get_alive_jerrymons(self, user_id: str):
+    async def get_alive_jerrymons(self, user_id: str): #probs not needed anymore
         return await self.supabase.table("jerrymons_inventory").select("*").eq("user_id", user_id).gt("hp", 0).execute().data
 
     async def get_jerrymon_move_tree_by_lvl(self, jerrymon_id: int, lvl: int) -> list[int]:
@@ -66,3 +67,6 @@ class JerrymonsDB(CoreDB):
         if result.data:
             return [row["jerrymon_move_id"] for row in result.data]
         return []
+
+    async def save_jerrymon(self, jerrymon: dict): 
+        return await self.supabase.table("jerrymons_inventory").update(jerrymon).eq("id", jerrymon["id"]).execute()
