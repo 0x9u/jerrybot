@@ -218,7 +218,7 @@ class UserDB(CoreDB):
         passive_mode = not await self.get_passive_mode(user_id)
         await self.supabase.table("users").upsert(
             {"id": user_id, "passive": passive_mode}
-        )
+        ).execute()
         return passive_mode
 
     async def get_passive_mode(self, user_id: str) -> bool:
