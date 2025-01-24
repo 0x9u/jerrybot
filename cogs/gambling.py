@@ -548,6 +548,10 @@ class Gambling(commands.Cog):
         if await database.db.get_user_coins(str(interaction.user.id)) < bet:
             await interaction.followup.send("You don't have enough coins to play Russian Roulette.")
             return
+        
+        if bet <= 0:
+            await interaction.followup.send("You can't bet 0 or less coins.")
+            return
 
         global_bank = await database.db.get_user_coins(str(self.bot.user.id))
         if global_bank < bet * 100:
