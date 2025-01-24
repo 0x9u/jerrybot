@@ -25,6 +25,9 @@ ROB_COOLDOWN = 60
 # 2 hours
 HEIST_COOLDOWN = 60 * 60 * 2
 
+# 30 minutes
+PASSIVE_COOLDOWN = 60 * 30
+
 
 class Points(commands.Cog):
     def __init__(self, bot):
@@ -37,6 +40,7 @@ class Points(commands.Cog):
         self.last_msg_time: dict[str, int] = {}
         self.last_rob_time: dict[str, int] = {}
         self.last_heist_time: dict[str, int] = {}
+        self.last_passive_time: dict[str, int] = {}
 
         self.super_saiyan_mode: dict[str, int] = {}
 
@@ -74,7 +78,8 @@ class Points(commands.Cog):
 
                 if toxicity >= 2 and user_id not in self.super_saiyan_mode:
                     await message.channel.send(
-                        f"Nice {message.author.name}, you got {toxicity}x coins and xp for that message."
+                        f"Nice {message.author.name}, you got {
+                            toxicity}x coins and xp for that message."
                     )
 
                 highest = await database.db.get_leaderboard_highest()
@@ -82,7 +87,8 @@ class Points(commands.Cog):
                 buff = await database.db.get_buff(user_id)
                 expired = False
                 if buff:
-                    time_created = datetime.fromisoformat(buff[0]["time_created"])
+                    time_created = datetime.fromisoformat(
+                        buff[0]["time_created"])
                     if time_created + timedelta(hours=2) < datetime.now(timezone.utc):
                         expired = True
                         await database.db.delete_buff(user_id)
@@ -106,7 +112,8 @@ class Points(commands.Cog):
                     )
                     if user_id not in self.super_saiyan_mode:
                         await message.channel.send(
-                            f"{xp_msg}{' ' if xp_msg and coins_msg else ''}{coins_msg} for buff {message.author.name}"
+                            f"{xp_msg}{' ' if xp_msg and coins_msg else ''}{
+                                coins_msg} for buff {message.author.name}"
                         )
 
                 king_multiplier = 2 if highest and highest["user_id"] == user_id else 1
@@ -148,7 +155,8 @@ class Points(commands.Cog):
                 ):
                     embed = discord.Embed(
                         title="Super Saiyan",
-                        description=f"Quick, {message.author.mention} spam as much as you can in 1 minute!\nYou get a extra 2x multiplier (xp and coins) for each message.\nNote: the bots messages will not show.",
+                        description=f"Quick, {
+                            message.author.mention} spam as much as you can in 1 minute!\nYou get a extra 2x multiplier (xp and coins) for each message.\nNote: the bots messages will not show.",
                         color=discord.Color.green(),
                     )
                     await message.channel.send(embed=embed)
@@ -223,7 +231,8 @@ class Points(commands.Cog):
         maxCoins = await database.db.get_max_bank_coins(user_id)
         embed = discord.Embed(
             title="Bank",
-            description=f"{user.name}, you have {coins}/{maxCoins} coins in the bank.",
+            description=f"{user.name}, you have {
+                coins}/{maxCoins} coins in the bank.",
             color=discord.Color.blue(),
         )
         await interaction.followup.send(
@@ -248,7 +257,8 @@ class Points(commands.Cog):
         maxBankCoins = await database.db.get_max_bank_coins(user_id)
         embed = discord.Embed(
             title="Balance",
-            description=f"{user.name}, you have {coins} coins and {bankCoins}/{maxBankCoins} coins in the bank.",
+            description=f"{user.name}, you have {coins} coins and {
+                bankCoins}/{maxBankCoins} coins in the bank.",
             color=discord.Color.blue(),
         )
         await interaction.followup.send(embed=embed)
@@ -334,7 +344,8 @@ class Points(commands.Cog):
         coins = await database.db.get_bank_coins(user_id)
         if coins < amount:
             await interaction.followup.send(
-                f"You don't have enough coins in the bank to withdraw {amount}."
+                f"You don't have enough coins in the bank to withdraw {
+                    amount}."
             )
             return
         await database.db.update_bank_coins(user_id, -amount)
@@ -414,12 +425,22 @@ class Points(commands.Cog):
             and time.time() - self.last_rob_time[user_id] < ROB_COOLDOWN
         ):
             await interaction.followup.send(
-                f"You can't rob again for {ROB_COOLDOWN - int(time.time() -self.last_rob_time[user_id])} seconds."
+                f"You can't rob again for {
+                    ROB_COOLDOWN - int(time.time() - self.last_rob_time[user_id])} seconds."
             )
             return
 
         await database.db.verify_user(user_id)
         await database.db.verify_user(target_id)
+        
+        if await database.db.get_passive_mode(user_id):
+            await interaction.followup.send("You can't rob while in passive mode.")
+            return
+        
+        if await database.db.get_passive_mode(target_id):
+            await interaction.followup.send(f"{user.name} is in passive mode.")
+            return
+        
         target_coins = await database.db.get_user_coins(target_id)
 
         if target_coins == 0:
@@ -483,13 +504,13 @@ class Points(commands.Cog):
             await interaction.followup.send("You can't start a heist on the bot.")
             return
 
-
         if (
             target_id in self.last_heist_time
             and time.time() - self.last_heist_time[target_id] < HEIST_COOLDOWN
         ):
             await interaction.followup.send(
-                f"{user.name} has been heisted recently.\nYou can't heist them for {HEIST_COOLDOWN - int(time.time() - self.last_heist_time[target_id])} seconds."
+                f"{user.name} has been heisted recently.\nYou can't heist them for {
+                    HEIST_COOLDOWN - int(time.time() - self.last_heist_time[target_id])} seconds."
             )
             return
         elif target_id in self.last_heist_time:
@@ -498,6 +519,15 @@ class Points(commands.Cog):
 
         await database.db.verify_user(user_id)
         await database.db.verify_user(target_id)
+        
+        if await database.db.get_passive_mode(user_id):
+            await interaction.followup.send("You can't start a heist while in passive mode.")
+            return
+        
+        if await database.db.get_passive_mode(target_id):
+            await interaction.followup.send(f"{user.name} is in passive mode.")
+            return
+        
         target_stuff = (
             await database.db.get_bank_coins(target_id)
             + await database.db.get_farms(target_id)
@@ -514,7 +544,8 @@ class Points(commands.Cog):
 
         embed = discord.Embed(
             title="Heist",
-            description=f"{interaction.user.name} started a heist on {user.name}\nThe heist requires at least 4 players.\nThe more people join, the higher the chance of success.\nClick the button to join the heist",
+            description=f"{interaction.user.name} started a heist on {
+                user.name}\nThe heist requires at least 4 players.\nThe more people join, the higher the chance of success.\nClick the button to join the heist",
             color=discord.Color.green(),
         )
 
@@ -558,7 +589,8 @@ class Points(commands.Cog):
 
         embed = discord.Embed(
             title="Heist Summary",
-            description=f"Players joined the heist: {', '.join([user.name for user in view.users])}",
+            description=f"Players joined the heist: {
+                ', '.join([user.name for user in view.users])}",
             color=discord.Color.green(),
         )
 
@@ -576,7 +608,8 @@ class Points(commands.Cog):
             heist_coins = np.random.randint(1, coins + 1) if coins > 0 else 0
 
             slaves = await database.db.get_slaves(target_id)
-            heist_slaves = np.random.randint(1, slaves + 1) if slaves > 0 else 0
+            heist_slaves = np.random.randint(
+                1, slaves + 1) if slaves > 0 else 0
 
             farm_level = (await database.db.get_item_by_id(ItemCode.FARM.value))["level_require"]
             farms = await database.db.get_farms(target_id)
@@ -620,7 +653,7 @@ class Points(commands.Cog):
                         target_id, chosen_share["symbol"], -heist_shares
                     )
                     await database.db.update_user_portfolio(
-                       str(robber.id), chosen_share["symbol"], heist_shares
+                        str(robber.id), chosen_share["symbol"], heist_shares
                     )
 
                 embed.add_field(
@@ -632,8 +665,8 @@ class Points(commands.Cog):
                         f"Received {heist_farms} farms.\n"
                         f"Received {heist_mines} mines"
                         + (f"\nReceived {heist_shares} of {chosen_share["symbol"]}"
-                        if heist_shares
-                        else "")
+                           if heist_shares
+                           else "")
                     ),
                     inline=False,
                 )
@@ -647,6 +680,27 @@ class Points(commands.Cog):
         await interaction.followup.send(embed=embed)
         self.last_heist_time[target_id] = time.time()
         shared.heists.remove(target_id)
+
+    @app_commands.command(name="toggle_passive", description="Toggle passive mode.")
+    async def toggle_passive(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        await database.db.verify_user(str(interaction.user.id))
+        
+        if self.last_passive_time.get(str(interaction.user.id)) and time.time() - self.last_passive_time[str(interaction.user.id)] < PASSIVE_COOLDOWN:
+            await interaction.followup.send(f"You can't toggle passive mode again for {PASSIVE_COOLDOWN - int(time.time() - self.last_passive_time[str(interaction.user.id)])} seconds.")
+            return
+
+        self.last_passive_time[str(interaction.user.id)] = time.time()
+        passive_mode = await database.db.toggle_passive_mode(str(interaction.user.id))
+        await interaction.followup.send(f"Passive mode set to {passive_mode}.")
+
+    @app_commands.command(name="check_passive", description="Check passive mode.")
+    async def check_passive(self, interaction: discord.Interaction):
+        await interaction.response.defer()
+        await database.db.verify_user(str(interaction.user.id))
+        
+        passive_mode = await database.db.get_passive_mode(str(interaction.user.id))
+        await interaction.followup.send(f"Passive mode is {passive_mode}.")
 
 
 async def setup(bot):
