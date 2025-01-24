@@ -1,4 +1,5 @@
 import discord
+import database
 
 
 class HeistView(discord.ui.View):
@@ -14,6 +15,10 @@ class HeistView(discord.ui.View):
 
         if self.target_user.id == interaction.user.id:
             await interaction.followup.send("You can't join your own heist!", ephemeral=True)
+            return
+        
+        if await database.db.get_passive_mode(str(interaction.user.id)):
+            await interaction.followup.send("You can't join a heist while passive mode is enabled!", ephemeral=True)
             return
 
         if not any(user.id == interaction.user.id for user in self.users):

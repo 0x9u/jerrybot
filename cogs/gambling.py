@@ -665,7 +665,6 @@ class Gambling(commands.Cog):
                         inline=False,
                     )
                 
-                winnings *= initial_multiplier
                 max_barrel -= 1
                 await message.edit(embed=embed)
                 if max_barrel == 1:
@@ -690,6 +689,7 @@ class Gambling(commands.Cog):
                         inline=False,
                     )
                     await message.edit(embed=embed)
+                    winnings *= initial_multiplier
                     await database.db.update_user_coins(str(self.bot.user.id), -winnings)
                     await database.db.update_user_coins(str(interaction.user.id), winnings)
                     break
