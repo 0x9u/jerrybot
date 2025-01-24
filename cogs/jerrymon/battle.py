@@ -12,4 +12,8 @@ class JerryMonBattle(JerryMonCore):
 
     @jerrymon_group.command(name="hunt", description="Hunt for jerrymon.")
     async def hunt(self, interaction: discord.Interaction):
-        pass
+        await interaction.response.defer()
+        
+        random_jerrmon = await database.db.get_random_jerrymon()
+        
+        if not random_jerrmon:

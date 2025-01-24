@@ -213,3 +213,22 @@ class UserDB(CoreDB):
             .eq("id", user_id)
             .execute()
         )
+
+    async def toggle_passive_mode(self, user_id: str) -> bool:
+        passive_mode = not await self.get_passive_mode(user_id)
+        await self.supabase.table("users").upsert(
+            {"id": user_id, "passive": passive_mode}
+        ).execute()
+        return passive_mode
+
+    async def get_passive_mode(self, user_id: str) -> bool:
+        return (
+            (
+                await self.supabase.table("users")
+                .select("passive")
+                .eq("id", user_id)
+                .execute()
+            )
+            .data[0]
+            .get("passive")
+        )
