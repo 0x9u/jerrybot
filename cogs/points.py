@@ -578,7 +578,7 @@ class Points(commands.Cog):
             slaves = await database.db.get_slaves(target_id)
             heist_slaves = np.random.randint(1, slaves + 1) if slaves > 0 else 0
 
-            farm_level = await database.db.get_item_by_id(ItemCode.FARM.value)["level_require"]
+            farm_level = (await database.db.get_item_by_id(ItemCode.FARM.value))["level_require"]
             farms = await database.db.get_farms(target_id)
             heist_farms = (
                 np.random.randint(1, farms + 1)
@@ -586,7 +586,7 @@ class Points(commands.Cog):
                 else 0
             )
 
-            mine_level = await database.db.get_item_by_id(ItemCode.MINE.value)["level_require"]
+            mine_level = (await database.db.get_item_by_id(ItemCode.MINE.value))["level_require"]
             mines = await database.db.get_mines(target_id)
             heist_mines = (
                 np.random.randint(1, mines + 1)
