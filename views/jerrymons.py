@@ -80,7 +80,6 @@ class JerrymonBattleView(discord.ui.View):
         else:
             wild_jerrymon = await database.db.get_jerrymon_by_id(jerrymon_id)
             view.jerrymon_id = await database.db.add_jerrymon_to_inventory(str(view.user.id), wild_jerrymon["id"])
-            print("JERRYMON INV ID", view.jerrymon_id)
             view.opponent_party = [await database.db.get_jerrymon_inventory_by_id(str(view.user.id), view.jerrymon_id)]
             # ! consider the case where its a evolved jerrymon
             view.opponent_jerrymon_moves = [await database.db.get_jerrymon_known_moves(
@@ -110,9 +109,6 @@ class JerrymonBattleView(discord.ui.View):
         )
 
         view.add_item(view.dropdown)
-
-        print("enemy moves", view.opponent_jerrymon_moves,
-              "player moves", view.jerrymon_moves)
 
         view.embed.set_field_at(1, name=f"{view.user.name} - {selected_jerrymon['nickname'] or selected_jerrymon['jerrymons']['name']}",
                                 value=f"HP: {selected_jerrymon['hp']}/{selected_jerrymon['max_hp']}", inline=True)
@@ -156,8 +152,6 @@ class JerrymonBattleView(discord.ui.View):
 
         selected_move = random.choice(
             self.opponent_jerrymon_moves[self.opponent_selected_jerrymon])
-
-        print("AI MOVE", selected_move)
 
         damage = jerrymon_calculate_damage(
             self.opponent_party[self.opponent_selected_jerrymon]["attack"],
@@ -220,8 +214,6 @@ class JerrymonBattleView(discord.ui.View):
                 await interaction.followup.send(content="You have not selected a move!", ephemeral=True)
                 return
 
-            print("TRYING TO ATTACK JERRYMON")
-
             opponent_name = (
                 self.opponent.name if self.opponent is not None else self.opponent_party[self.opponent_selected_jerrymon]["jerrymons"]["name"]) if self.current_turn else self.user.name
 
@@ -241,8 +233,6 @@ class JerrymonBattleView(discord.ui.View):
                     await self.ai_move()
 
                 return
-
-            print("PASSed")
 
             selected_jerrymon = (
                 self.user_party[self.selected_jerrymon] if self.current_turn else self.opponent_party[self.opponent_selected_jerrymon]
@@ -283,8 +273,6 @@ class JerrymonBattleView(discord.ui.View):
                 self.opponent_party[self.opponent_selected_jerrymon] = opponent_selected_jerrymon
             else:
                 self.user_party[self.selected_jerrymon] = opponent_selected_jerrymon
-
-            print("PASSED 2")
 
             if jerrymon_died:
                 next_alive = get_alive_jerrymon(
@@ -360,8 +348,6 @@ class JerrymonBattleView(discord.ui.View):
             await interaction.followup.send(content="You cannot run from a battle!", ephemeral=True)
             return
 
-        print("TEST")
-
         self.embed.set_field_at(
             0, name="Status", value="You ran from the Jerrymon!", inline=False)
 
@@ -429,7 +415,6 @@ class JerrymonBattleView(discord.ui.View):
 class BattleMoveDropdown(discord.ui.Select):
     def __init__(self, moves: list[dict[str, str]],  parent: JerrymonBattleView):
         self.moves = moves
-        print("MOVES", moves)
         self.parent = parent
         options = [
             discord.SelectOption(label=move["jerrymons_moves"]["name"]) for move in self.moves
@@ -450,7 +435,6 @@ class BattleMoveDropdown(discord.ui.Select):
 
         move = next(
             (move for move in self.moves if move["jerrymons_moves"]["name"] == self.values[0]), None)
-        print("MOVE", move)
         if move is None:
             return
 
