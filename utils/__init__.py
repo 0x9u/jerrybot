@@ -6,7 +6,7 @@ from .items import ALIAS, get_loot, handle_item_use, EquipType, get_equip_type, 
 from .coins import adjust_price
 from .stocks import TOP_STOCKS, get_top_stocks
 from .gambling import slot_gamble
-from .jerrymons import JerrymonType, JerrymonStatusMove, JerrymonStatusCondition, JerrymonMoveCategory, calculate_jerrymon_max_xp, get_jerrymon_type, get_jerrymon_status_move, get_jerrymon_status_condition, get_jerrymon_move_category, jerrymon_calculate_damage
+from .jerrymons import JerrymonType, JerrymonStatusMove, JerrymonStatusCondition, JerrymonMoveCategory, calculate_jerrymon_max_xp, get_jerrymon_type, get_jerrymon_status_move, get_jerrymon_status_condition, get_jerrymon_move_category, jerrymon_calculate_damage, jerrymon_calculate_xp_earnt
 
 __all__ = ["ALIAS",
            "get_loot",
@@ -40,4 +40,5 @@ __all__ = ["ALIAS",
            "get_jerrymon_status_move",
            "get_jerrymon_status_condition",
            "get_jerrymon_move_category",
-           "jerrymon_calculate_damage"]
+           "jerrymon_calculate_damage",
+           "jerrymon_calculate_xp_earnt"]

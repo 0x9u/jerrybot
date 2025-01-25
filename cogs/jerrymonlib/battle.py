@@ -3,10 +3,10 @@ from discord import app_commands
 import database
 from views import JerrymonBattleView
 
-from .core import JerryMonCore, jerrymon_group
+from .core import JerryMonCore
 
 class JerryMonBattle(JerryMonCore):
-    @jerrymon_group.command(name="battle", description="Battle other jerrymon")
+    @JerryMonCore.jerrymon_group.command(name="battle", description="Battle other jerrymon")
     @app_commands.describe(user="User you wanna battle with.")
     async def battle(self, interaction: discord.Interaction, user: discord.User):
         await interaction.response.defer()
@@ -30,27 +30,30 @@ class JerryMonBattle(JerryMonCore):
             user
         )
         
-        await view.stop()
+        await view.wait()
 
-    @jerrymon_group.command(name="hunt", description="Hunt for jerrymon.")
+    @JerryMonCore.jerrymon_group.command(name="hunt", description="Hunt for jerrymon.")
     async def hunt(self, interaction: discord.Interaction):
         await interaction.response.defer()
         
         await database.db.verify_user(str(interaction.user.id))
-        
+                
         if await database.db.get_jerrymon_party_count(str(interaction.user.id)) == 0:
             await interaction.followup.send("You don't have any jerrymons in your party.")
             return
         
         random_jerrymon = await database.db.get_random_jerrymon()
         
+        # horrible code ;(
+        jerrymon = await database.db.get_jerrymon_by_id(random_jerrymon)
+        
         view = await JerrymonBattleView.create(
             "Jerrymon Hunt",
-            f"You found a {random_jerrymon['name']}!",
+            f"You found a {jerrymon['name']}!",
             interaction,
             interaction.user,
-            jerrymon_id=random_jerrymon["jerrymon_id"]
+            jerrymon_id=random_jerrymon
         )
         
-        await view.stop()
+        await view.wait()
         

@@ -21,12 +21,13 @@ from discord import app_commands
 # type 6 = Defense
 
 # todo: figure out how to make moves 
-# todo: figure out what moves a jerrymon has (for now imma just give the jerrymon all moves)
+
+# todo: implement status condition, captured at, nickname
+# todo: implement leveling up
 
 class JerryMonCore(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.last_hunt_time : dict[str, int] = {}
-        
-
-jerrymon_group = app_commands.Group(name="jerrymon", description="Jerrymon commands.")
+    
+    jerrymon_group = app_commands.Group(name="jerrymon", description="Jerrymon commands.")
