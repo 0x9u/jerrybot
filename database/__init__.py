@@ -11,6 +11,7 @@ from .leaderboard import LeaderboardDB
 from .market import MarketDB
 from .tycoon import TycoonDB
 from .user import UserDB
+from .jerrymons import JerrymonsDB
 
 class DB(
     AdminDB,
@@ -26,6 +27,8 @@ class DB(
     MarketDB,
     TycoonDB,
     UserDB,
+    JerrymonsDB
+    
 ):
     pass
 

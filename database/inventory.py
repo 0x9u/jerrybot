@@ -66,7 +66,7 @@ class InventoryDB(CoreDB):
             .execute()
         ).data
 
-    async def get_item_inventory_count_id(self, user_id: str, item_id: str):
+    async def get_item_inventory_count_id(self, user_id: str, item_id: int):
         return (
             await self.supabase.table("inventory_count")
             .select("*")
@@ -112,25 +112,6 @@ class InventoryDB(CoreDB):
             .eq("items.name", item_name)
             .execute()
         ).data
-
-    async def update_item_inventory(
-        self, user_id: str, inventory_id: int, uses_left: int
-    ):
-        """
-        Updates the inventory for a given item of the user with the new number of uses left.
-
-        Parameters
-        ----------
-        user_id : str
-            The id of the user whose inventory is to be updated
-        inventory_id : int
-            The id of the inventory entry to be updated
-        uses_left : int
-            The updated number of uses left for the item
-        """
-        await self.supabase.table("inventory").update(
-            {"user_id": user_id, "id": inventory_id, "uses_left": uses_left}
-        ).execute()
 
     async def equip_gun(self, user_id: str, item_id: int):
         await self.supabase.table("equip").upsert(

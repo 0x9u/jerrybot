@@ -6,8 +6,7 @@ import os
 
 import logging
 
-logger = logging.getLogger("discord")
-logger.setLevel(logging.ERROR)
+logging.getLogger("discord").setLevel(logging.ERROR)
 logging.getLogger("discord.http").setLevel(logging.INFO)
 
 import database
@@ -24,7 +23,6 @@ activity = discord.Activity(
 )
 
 bot = commands.Bot(command_prefix="!", activity=activity, intents=intents)
-
 
 @bot.event
 async def on_ready():
