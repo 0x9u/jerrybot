@@ -29,5 +29,6 @@ class JerryMonCore(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.last_hunt_time : dict[str, int] = {}
+        self.last_heal_time : dict[str, int] = {}
     
     jerrymon_group = app_commands.Group(name="jerrymon", description="Jerrymon commands.")

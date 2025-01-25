@@ -115,7 +115,7 @@ class Items(commands.Cog):
 
         item = await database.db.get_item_inventory_by_id(user_id, item[0]["item_id"])
 
-        if not await handle_item_use(user_id, item[0], amount, interaction, self):
+        if not await handle_item_use(user_id, item[0], amount, interaction, self.bot):
             return
 
         # finally item count

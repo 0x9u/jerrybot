@@ -13,6 +13,8 @@ from utils import jerrymon_calculate_damage, jerrymon_calculate_xp_earnt, ItemCo
 
 # todo: fix moves
 
+BASE_CAPTURE_CHANCE = 50
+
 
 def get_alive_jerrymon(data: dict) -> int:
     return next((i for i, d in enumerate(data) if d.get("hp", 0) > 0), -1)
@@ -112,9 +114,10 @@ class JerrymonBattleView(discord.ui.View):
         print("enemy moves", view.opponent_jerrymon_moves,
               "player moves", view.jerrymon_moves)
 
-        view.embed.set_field_at(1, name=view.user.name,
+        view.embed.set_field_at(1, name=f"{view.user.name} - {selected_jerrymon['nickname'] or selected_jerrymon['jerrymons']['name']}",
                                 value=f"HP: {selected_jerrymon['hp']}/{selected_jerrymon['max_hp']}", inline=True)
-        view.embed.set_field_at(2, name=view.opponent.name if view.opponent is not None else view.opponent_party[view.opponent_selected_jerrymon]['jerrymons']["name"],
+        view.embed.set_field_at(2, name=f"{view.opponent.name} - {opponent_selected_jerrymon['nickname'] or opponent_selected_jerrymon['jerrymons']['name']}"
+                                if view.opponent is not None else opponent_selected_jerrymon['jerrymons']["name"],
                                 value=f"HP: {opponent_selected_jerrymon['hp']}/{opponent_selected_jerrymon['max_hp']}", inline=True)
 
         await message.edit(embed=view.embed, view=view)
@@ -127,9 +130,10 @@ class JerrymonBattleView(discord.ui.View):
     async def update_message(self):
         selected_jerrymon = self.user_party[self.selected_jerrymon]
         opponent_selected_jerrymon = self.opponent_party[self.opponent_selected_jerrymon]
-        self.embed.set_field_at(1, name=self.user.name,
+        self.embed.set_field_at(1, name=f"{self.user.name} - {selected_jerrymon['nickname'] or selected_jerrymon['jerrymons']['name']}",
                                 value=f"HP: {selected_jerrymon['hp']}/{selected_jerrymon['max_hp']}", inline=True)
-        self.embed.set_field_at(2, name=self.opponent.name if self.opponent is not None else opponent_selected_jerrymon['jerrymons']["name"],
+        self.embed.set_field_at(2, name=f"{self.opponent.name} - {opponent_selected_jerrymon['nickname'] or opponent_selected_jerrymon['jerrymons']['name']}"
+                                if self.opponent is not None else opponent_selected_jerrymon['jerrymons']["name"],
                                 value=f"HP: {opponent_selected_jerrymon['hp']}/{opponent_selected_jerrymon['max_hp']}", inline=True)
 
         await self.message.edit(embed=self.embed, view=self)
@@ -179,7 +183,8 @@ class JerrymonBattleView(discord.ui.View):
                 await self.save_data()
                 return
 
-            name_of_next_alive = self.user_party[next_alive]["name"]
+            name_of_next_alive = self.user_party[next_alive]["jerrymons"][
+                "name"] or self.user_party[next_alive]["jerrymons"]["nickname"]
 
             self.embed.set_field_at(0, name="Status",
                                     value=f"You switched out to {name_of_next_alive}!", inline=False)
@@ -286,9 +291,9 @@ class JerrymonBattleView(discord.ui.View):
                     self.opponent_party if self.current_turn else self.user_party)
                 if next_alive == -1:
 
-                    winner = (self.opponent.name if self.opponent is not None else self.opponent_party[
-                              self.opponent_selected_jerrymon]["jerrymons"]["name"]) if self.current_turn else self.user.name
-                    await interaction.followup.send(content=f"{winner.name} won the battle!", ephemeral=True)
+                    winner = self.user.name if self.current_turn else (self.opponent.name if self.opponent is not None else self.opponent_party[
+                        self.opponent_selected_jerrymon]["jerrymons"]["name"])
+                    await interaction.followup.send(content=f"{winner} won the battle!")
                     await self.update_message()
 
                     # calculate xp earnt
@@ -298,16 +303,21 @@ class JerrymonBattleView(discord.ui.View):
                     if self.current_turn or self.opponent is not None:
 
                         xp = jerrymon_calculate_xp_earnt(
-                            selected_jerrymon["jerrymons"]["level"],
-                            opponent_selected_jerrymon["jerrymons"]["level"]
+                            selected_jerrymon["level"],
+                            opponent_selected_jerrymon["level"]
                         )
 
-                        await interaction.followup.send(content=f"{winner} gained {xp} xp!", ephemeral=True)
+                        await interaction.followup.send(content=f"{winner} gained {xp} xp!")
 
                         if self.current_turn:
                             self.user_party[self.selected_jerrymon]["xp"] += xp
                         else:
                             self.opponent_party[self.opponent_selected_jerrymon]["xp"] += xp
+
+                    for child in self.children:
+                        child.disabled = True
+
+                    await self.message.edit(embed=self.embed, view=self)
 
                     await self.save_data()
                     self.stop()
@@ -374,15 +384,33 @@ class JerrymonBattleView(discord.ui.View):
                 await interaction.followup.send(content="You can only capture wild jerrymons!", ephemeral=True)
                 return
 
-            jerrymon_balls = await database.db.get_item_inventory_count(str(interaction.user.id), ItemCode.JERRYMON_BALL.value)
+            jerrymon_balls = await database.db.get_item_inventory_by_id(str(interaction.user.id), ItemCode.JERRYMON_BALL.value)
+            
+            jerrymon_balls = jerrymon_balls[0] if jerrymon_balls is not None else None
 
-            jerrymon_balls = jerrymon_balls[0]["count"] if jerrymon_balls else 0
-
-            if jerrymon_balls < 1:
+            if jerrymon_balls is None:
                 await interaction.followup.send(content="You don't have any jerrymon balls!", ephemeral=True)
                 return
 
-            await database.db.update_item_inventory_count(str(interaction.user.id), ItemCode.JERRYMON_BALL.value, -1)
+            await database.db.remove_item_from_inventory(str(interaction.user.id), jerrymon_balls["id"], 1)
+            
+            # calculate chance
+
+            opponent_jerrymon = self.opponent_party[self.opponent_selected_jerrymon]
+
+            speed_factor = 1 / (opponent_jerrymon["speed"] / 100)
+
+            health_factor = (
+                opponent_jerrymon["max_hp"] - opponent_jerrymon["hp"]) / opponent_jerrymon["max_hp"]
+
+            capture_chance = BASE_CAPTURE_CHANCE * speed_factor * health_factor * 2
+
+            capture_chance = min(0, max(100, capture_chance))
+
+            if not random.uniform(0, 100) <= capture_chance:
+                await interaction.followup.send(content="You failed to capture the Jerrymon!", ephemeral=True)
+                await self.ai_move()
+                return
 
             await self.save_data()
             # no need to do anything else, its already saved
@@ -415,12 +443,14 @@ class BattleMoveDropdown(discord.ui.Select):
         self.options = [
             discord.SelectOption(label=move["jerrymons_moves"]["name"]) for move in moves
         ]
+        self.moves = moves
 
     async def callback(self, interaction: discord.Interaction):
         await interaction.response.defer()
 
         move = next(
             (move for move in self.moves if move["jerrymons_moves"]["name"] == self.values[0]), None)
+        print("MOVE", move)
         if move is None:
             return
 

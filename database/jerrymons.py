@@ -34,7 +34,7 @@ class JerrymonsDB(CoreDB):
     async def get_jerrymon_inventory_by_nickname(self, user_id: str, nickname: str):
         jerrymon = await self.supabase.table("jerrymons_inventory").select("*").eq("user_id", user_id).eq("nickname", nickname).execute()
         return jerrymon.data[0] if len(jerrymon.data) > 0 else None
-    
+
     async def get_jerrymon_known_moves(self, jerrymon_inventory_id: int):
         return (await self.supabase.table("jerrymons_known_moves").select("*, jerrymons_moves(*)").eq("jerrymon_inventory_id", jerrymon_inventory_id).execute()).data
 
@@ -61,8 +61,18 @@ class JerrymonsDB(CoreDB):
         # returns id of newly created
         return (await self.supabase.rpc("add_jerrymon_to_inventory", {"p_user_id": user_id, "p_jerrymon_id": jerrymon_id}).execute()).data
 
-    async def get_alive_jerrymons(self, user_id: str):  # probs not needed anymore
-        return (await self.supabase.table("jerrymons_inventory").select("*").eq("user_id", user_id).gt("hp", 0).execute()).data
+    async def get_alive_jerrymons_count(self, user_id: str):
+        return (await self.supabase.table("jerrymons_inventory").select("*", count="exact").eq("user_id", user_id).gt("hp", 0).eq("in_party", True).execute()).count
+
+    async def get_dead_jerrymons(self, user_id: str):
+        return (await self.supabase.table("jerrymons_inventory").select("*").eq("user_id", user_id).lt("hp", 1).execute()).data
+
+    async def heal_jerrymons(self, user_id: str):
+        # todo: put this as a rpc
+        jerrymons = await self.get_jerrymon_party(user_id)
+        for jerrymon in jerrymons:
+            max_hp = (await self.supabase.table("jerrymons_inventory").select("max_hp").eq("id", jerrymon["id"]).execute()).data[0]["max_hp"]
+            await self.supabase.table("jerrymons_inventory").update({"hp": max_hp}).eq("user_id", user_id).eq("id", jerrymon["id"]).execute()
 
     async def get_jerrymon_move_tree_by_lvl(self, jerrymon_id: int, lvl: int) -> list[int]:
         result = await self.supabase.table("jerrymons_move_tree").select("jerrymon_move_id").eq("jerrymon_id", jerrymon_id).eq("level_earned", lvl).execute()

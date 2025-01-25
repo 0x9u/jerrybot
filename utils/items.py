@@ -335,7 +335,7 @@ async def handle_item_use(
     item,
     amount: int,
     interaction: discord.Interaction,
-    self: discord.Client,
+    bot: discord.Client,
 ) -> bool:
     import database
 
@@ -493,10 +493,10 @@ async def handle_item_use(
                     "Ping or type their user id to nuke them, or type `cancel` to cancel."
                 )
                 try:
-                    message = await self.wait_for(
+                    message = await bot.wait_for(
                         "message",
                         timeout=30,
-                        check=lambda m: m.author == interaction.user,
+                        check=lambda m: m.author == interaction.user and m.channel == interaction.channel,
                     )
                 except asyncio.TimeoutError:
                     await interaction.followup.send("You took too long to respond.")
@@ -526,6 +526,16 @@ async def handle_item_use(
 
                 await database.db.delete_user(target_id)
                 await interaction.followup.send("Nuke complete.")
+                
+                user = await bot.fetch_user(target_id)
+                embed = discord.Embed(
+                    title="GG, You have been nuked!",
+                    description=f"{interaction.user.name} has nuked you\n"
+                    "Get gud bud.",
+                    color=discord.Color.red(),
+                )
+                
+                await user.send(embed=embed)
 
                 return False
             case _:
