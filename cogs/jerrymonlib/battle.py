@@ -3,11 +3,13 @@ from discord import app_commands
 import database
 from views import JerrymonBattleView
 import time
+import random
 
 from .core import JerryMonCore
 
 # 5 minutes
 HEAL_COOLDOWN = 60 * 5
+HUNT_COOLDOWN = 60 * 30
 
 
 class JerryMonBattle(JerryMonCore):
@@ -51,12 +53,22 @@ class JerryMonBattle(JerryMonCore):
 
         await database.db.verify_user(str(interaction.user.id))
 
+        if str(interaction.user.id) in self.last_battle_time and time.time() - self.last_battle_time[str(interaction.user.id)] < HUNT_COOLDOWN:
+            await interaction.followup.send(f"You can't battle again for {HUNT_COOLDOWN - int(time.time() - self.last_battle_time[str(interaction.user.id)])} seconds.")
+            return
+
         if await database.db.get_jerrymon_party_count(str(interaction.user.id)) == 0:
             await interaction.followup.send("You don't have any jerrymons in your party.")
             return
 
         if await database.db.get_alive_jerrymons_count(str(interaction.user.id)) == 0:
             await interaction.followup.send("All your jerrymons are currently worn out.")
+            return
+
+        self.last_battle_time[str(interaction.user.id)] = time.time()
+
+        if random.random() > 0.75:
+            await interaction.followup.send("You didn't find anything.")
             return
 
         random_jerrymon = await database.db.get_random_jerrymon()
@@ -81,7 +93,7 @@ class JerryMonBattle(JerryMonCore):
         await database.db.verify_user(str(interaction.user.id))
 
         user_id = str(interaction.user.id)
-        
+
         if await database.db.get_jerrymon_party_count(user_id) == 0:
             await interaction.followup.send("You don't have any jerrymons in your party.")
             return
