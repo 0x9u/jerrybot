@@ -17,6 +17,9 @@ from shared import shared
 from datetime import datetime, timedelta, timezone
 import random
 
+from .tycoon import Tycoon
+from .jobs import Jobs
+
 # points system
 
 # 60 seconds
@@ -701,7 +704,13 @@ class Points(commands.Cog):
         
         passive_mode = await database.db.get_passive_mode(str(interaction.user.id))
         await interaction.followup.send(f"Passive mode is {passive_mode}.")
-
+    
+    @app_commands.command(name="collect_all", description="Collect all from tycoon and jobs.")
+    async def collect_all(self, interaction: discord.Interaction):
+        t = Tycoon(self.bot)
+        j = Jobs(self.bot)
+        await t.collect.callback(t, interaction)
+        await j.work.callback(j, interaction)
 
 async def setup(bot):
     await bot.add_cog(Points(bot))
