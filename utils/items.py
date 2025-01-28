@@ -540,7 +540,6 @@ async def handle_item_use(
                 
                 await user.send(embed=embed)
 
-                return False
             case _:
                 print("NO MATCH")
                 await interaction.followup.send(f"You can't use that.")
