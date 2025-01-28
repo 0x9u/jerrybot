@@ -12,7 +12,7 @@ class ItemDB(CoreDB):
             A list of dictionaries containing the data for items with a non-null price.
         """
         return (
-            await self.supabase.table("items").select("*").eq("in_shop", True).execute()
+            await self.supabase.table("items").select("*").order("price").eq("in_shop", True).execute()
         ).data
 
     async def get_all_items(self):

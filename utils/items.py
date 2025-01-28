@@ -132,6 +132,9 @@ class ItemCode(Enum):
     
     # Jerrymon
     JERRYMON_BALL = 89
+    FACTORY = 90
+    COMPANY = 91
+    SKYSCRAPER = 92
 
 
 loot_table_guns = {
