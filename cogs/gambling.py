@@ -682,6 +682,7 @@ class Gambling(commands.Cog):
                 await interaction.followup.send("Would you like to continue? (y/n)")
                 response = await self.bot.wait_for("message", check=lambda m: m.author.id == interaction.user.id and m.channel == interaction.channel and m.content.lower() in ["y", "n"], timeout=30)
                 if response.content.lower() != "y":
+                    winnings *= initial_multiplier
                     embed.add_field(
                         name="Thanks for playing!",
                         value="Have a nice day!\n"
@@ -689,7 +690,6 @@ class Gambling(commands.Cog):
                         inline=False,
                     )
                     await message.edit(embed=embed)
-                    winnings *= initial_multiplier
                     await database.db.update_user_coins(str(self.bot.user.id), -winnings)
                     await database.db.update_user_coins(str(interaction.user.id), winnings)
                     break
