@@ -5,9 +5,12 @@ import database
 import time
 import datetime
 
-SLAVE_RATE = 10
+SLAVE_RATE = 100
 FARM_RATE = 5_000
 MINES_RATE = 100_000
+FACTORY_RATE = 500_000
+COMPANY_RATE = 10_000_000
+SKYSCRAPER_RATE = 50_000_000
 TIME_TO_COLLECT = 30 * 60
 
 
@@ -29,6 +32,9 @@ class Tycoon(commands.Cog):
         slaves = await database.db.get_slaves(user_id)
         farms = await database.db.get_farms(user_id)
         mines = await database.db.get_mines(user_id)
+        factories = await database.db.get_factories(user_id)
+        companies = await database.db.get_companies(user_id)
+        skyscrapers = await database.db.get_skyscrapers(user_id)
 
         embed = discord.Embed(
             title="Tycoon",
@@ -50,6 +56,21 @@ class Tycoon(commands.Cog):
             value=f"Mines: {mines} - rate {MINES_RATE * mines} per 30 minutes",
             inline=False,
         )
+        embed.add_field(
+            name="Factories",
+            value=f"Factories: {factories} - rate {FACTORY_RATE * factories} per 30 minutes",
+            inline=False,
+        )
+        embed.add_field(
+            name="Companies",
+            value=f"Companies: {companies} - rate {COMPANY_RATE * companies} per 30 minutes",
+            inline=False,
+        )
+        embed.add_field(
+            name="Skyscrapers",
+            value=f"Skyscrapers: {skyscrapers} - rate {SKYSCRAPER_RATE * skyscrapers} per 30 minutes",
+            inline=False,
+        )
         await interaction.followup.send(embed=embed)
 
     @app_commands.command(name="collect", description="Collect coins from the tycoon.")
@@ -63,6 +84,9 @@ class Tycoon(commands.Cog):
         slaves = await database.db.get_slaves(user_id)
         farms = await database.db.get_farms(user_id)
         mines = await database.db.get_mines(user_id)
+        factories = await database.db.get_factories(user_id)
+        companies = await database.db.get_companies(user_id)
+        skyscrapers = await database.db.get_skyscrapers(user_id)
 
         if slaves == 0 and farms == 0 and mines == 0:
             embed = discord.Embed(
@@ -103,6 +127,9 @@ class Tycoon(commands.Cog):
                 SLAVE_RATE * slaves * slave_multiplier
                 + FARM_RATE * farms
                 + MINES_RATE * mines
+                + FACTORY_RATE * factories
+                + COMPANY_RATE * companies
+                + SKYSCRAPER_RATE * skyscrapers
             )
 
             taxed = int(coins * 0.1)
