@@ -1,3 +1,12 @@
+1.17:
+  date: "2025-01-28"
+  changes:
+    - "Fix bugs"
+    - "Add collect_all"
+1.16:
+  date: "2025-01-25"
+  changes:
+    - "Added Jerrymon"
 1.15:
   date: "2025-01-24"
   changes:

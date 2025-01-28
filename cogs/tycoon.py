@@ -120,6 +120,5 @@ class Tycoon(commands.Cog):
                 f"Can't collect yet. Collect in {TIME_TO_COLLECT - time_diff} seconds."
             )
 
-
 async def setup(bot):
     await bot.add_cog(Tycoon(bot))

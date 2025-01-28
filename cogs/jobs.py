@@ -8,6 +8,7 @@ import database
 from datetime import datetime, timezone, timedelta
 import random
 
+from discord.errors import InteractionResponded
 
 class Jobs(commands.Cog):
     def __init__(self, bot):
@@ -40,7 +41,12 @@ class Jobs(commands.Cog):
         description="Work at your job",
     )
     async def work(self, interaction: discord.Interaction):
-        await interaction.response.defer()
+        # because this command is used in collect_all
+        try:
+            await interaction.response.defer()
+        except InteractionResponded:
+            pass
+        
         user_id = str(interaction.user.id)
 
         await database.db.verify_user(user_id)
