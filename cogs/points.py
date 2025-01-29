@@ -536,6 +536,9 @@ class Points(commands.Cog):
             + await database.db.get_farms(target_id)
             + await database.db.get_slaves(target_id)
             + await database.db.get_mines(target_id)
+            + await database.db.get_factories(target_id)
+            + await database.db.get_companies(target_id)
+            + await database.db.get_skyscrapers(target_id)
             + sum([row["shares"] for row in await database.db.get_user_portfolio(target_id)])
         )
 
@@ -630,6 +633,30 @@ class Points(commands.Cog):
                 else 0
             )
 
+            factory_level = (await database.db.get_item_by_id(ItemCode.FACTORY.value))["level_require"]
+            factories = await database.db.get_factories(target_id)
+            heist_factories = (
+                np.random.randint(1, factories + 1)
+                if factories > 0 and level >= factory_level
+                else 0
+            )
+            
+            company_level = (await database.db.get_item_by_id(ItemCode.COMPANY.value))["level_require"]
+            companies = await database.db.get_companies(target_id)
+            heist_companies = (
+                np.random.randint(1, companies + 1)
+                if companies > 0 and level >= company_level
+                else 0
+            )
+            
+            skyscraper_level = (await database.db.get_item_by_id(ItemCode.SKYSCRAPER.value))["level_require"]
+            skyscrapers = await database.db.get_skyscrapers(target_id)
+            heist_skyscrapers = (
+                np.random.randint(1, skyscrapers + 1)
+                if skyscrapers > 0 and level >= skyscraper_level
+                else 0
+            )
+
             portfolio = await database.db.get_user_portfolio(target_id)
             chosen_share = random.choice(portfolio) if portfolio else None
             heist_shares = (
@@ -650,6 +677,15 @@ class Points(commands.Cog):
 
                 await database.db.update_mines(target_id, -heist_mines)
                 await database.db.update_mines(str(robber.id), heist_mines)
+                
+                await database.db.update_factories(target_id, -heist_factories)
+                await database.db.update_factories(str(robber.id), heist_factories)
+                
+                await database.db.update_companies(target_id, -heist_companies)
+                await database.db.update_companies(str(robber.id), heist_companies)
+                
+                await database.db.update_skyscrapers(target_id, -heist_skyscrapers)
+                await database.db.update_skyscrapers(str(robber.id), heist_skyscrapers)
 
                 if heist_shares:
                     await database.db.update_user_portfolio(
@@ -666,7 +702,10 @@ class Points(commands.Cog):
                         f"Received {heist_coins} coins.\n"
                         f"Received {heist_slaves} slaves.\n"
                         f"Received {heist_farms} farms.\n"
-                        f"Received {heist_mines} mines"
+                        f"Received {heist_mines} mines.\n"
+                        f"Received {heist_factories} factories.\n"
+                        f"Received {heist_companies} companies.\n"
+                        f"Received {heist_skyscrapers} skyscrapers.\n"
                         + (f"\nReceived {heist_shares} of {chosen_share["symbol"]}"
                            if heist_shares
                            else "")

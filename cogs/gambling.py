@@ -548,7 +548,7 @@ class Gambling(commands.Cog):
         if await database.db.get_user_coins(str(interaction.user.id)) < bet:
             await interaction.followup.send("You don't have enough coins to play Russian Roulette.")
             return
-        
+
         if bet <= 0:
             await interaction.followup.send("You can't bet 0 or less coins.")
             return
@@ -575,7 +575,7 @@ class Gambling(commands.Cog):
         if choice.content.lower() == "n":
             await interaction.followup.send("You chose not to play Russian Roulette.")
             return
-    
+
         max_barrel = 10
         winnings = bet
         initial_multiplier = 10
@@ -607,7 +607,8 @@ class Gambling(commands.Cog):
             embed.set_field_at(
                 0,
                 name="Rolling the revolver...",
-                value=f"{rolled} (where the bullet is: {bullet}) (max barrel: {max_barrel})",
+                value=f"{rolled} (where the bullet is: {
+                    bullet}) (max barrel: {max_barrel})",
                 inline=False
             )
 
@@ -637,6 +638,24 @@ class Gambling(commands.Cog):
                 if lose_mines > 0:
                     await database.db.update_mines(str(interaction.user.id), -lose_mines)
                     await database.db.update_mines(str(self.bot.user.id), lose_mines)
+                factories = await database.db.get_factories(str(interaction.user.id))
+                lose_factories = random.randint(
+                    0, factories) if factories > 0 else 0
+                if lose_factories > 0:
+                    await database.db.update_factories(str(interaction.user.id), -lose_factories)
+                    await database.db.update_factories(str(self.bot.user.id), lose_factories)
+                companies = await database.db.get_companies(str(interaction.user.id))
+                lose_companies = random.randint(
+                    0, companies) if companies > 0 else 0
+                if lose_companies > 0:
+                    await database.db.update_companies(str(interaction.user.id), -lose_companies)
+                    await database.db.update_companies(str(self.bot.user.id), lose_companies)
+                skyscrapers = await database.db.get_skyscrapers(str(interaction.user.id))
+                lose_skyscrapers = random.randint(
+                    0, skyscrapers) if skyscrapers > 0 else 0
+                if lose_skyscrapers > 0:
+                    await database.db.update_skyscrapers(str(interaction.user.id), -lose_skyscrapers)
+                    await database.db.update_skyscrapers(str(self.bot.user.id), lose_skyscrapers)
 
                 embed.add_field(
                     name="You Died!",
@@ -644,7 +663,11 @@ class Gambling(commands.Cog):
                     (f"\nYou lost {lose_slaves} slaves." if lose_slaves > 0 else "") +
                     (f"\nYou lost {lose_farms} farms." if lose_farms > 0 else "") +
                     (f"\nYou lost {
-                     lose_mines} mines." if lose_mines > 0 else ""),
+                     lose_mines} mines." if lose_mines > 0 else "") +
+                    (f"\nYou lost {lose_factories} factories." if lose_factories > 0 else "") +
+                    (f"\nYou lost {lose_companies} companies." if lose_companies > 0 else "") +
+                    (f"\nYou lost {
+                     lose_skyscrapers} skyscrapers." if lose_skyscrapers > 0 else ""),
                     inline=False,
                 )
                 await message.edit(embed=embed)
@@ -664,7 +687,7 @@ class Gambling(commands.Cog):
                         value="You won your bet. 🎉",
                         inline=False,
                     )
-                
+
                 max_barrel -= 1
                 await message.edit(embed=embed)
                 if max_barrel == 1:
@@ -696,7 +719,8 @@ class Gambling(commands.Cog):
 
                 initial_multiplier += 10
                 # change description
-                embed.description = f"Play Russian Roulette and see if you win.\nMoney betted on: {bet}\nInitial multiplier: {initial_multiplier}"
+                embed.description = f"Play Russian Roulette and see if you win.\nMoney betted on: {
+                    bet}\nInitial multiplier: {initial_multiplier}"
 
         shared.rob_lock.remove(str(interaction.user.id))
 

@@ -65,3 +65,57 @@ class TycoonDB(CoreDB):
             .data[0]
             .get("mines")
         )
+
+    async def update_factories(self, user_id: str, amount: int):
+        factories = await self.get_factories(user_id)
+        await self.supabase.table("users").update({"factories": factories + amount}).eq(
+            "id", user_id
+        ).execute()
+
+    async def get_factories(self, user_id: str):
+        return (
+            (
+                await self.supabase.table("users")
+                .select("factories")
+                .eq("id", user_id)
+                .execute()
+            )
+            .data[0]
+            .get("factories")
+        )
+
+    async def update_companies(self, user_id: str, amount: int):
+        companies = await self.get_companies(user_id)
+        await self.supabase.table("users").update({"companies": companies + amount}).eq(
+            "id", user_id
+        ).execute()
+
+    async def get_companies(self, user_id: str):
+        return (
+            (
+                await self.supabase.table("users")
+                .select("companies")
+                .eq("id", user_id)
+                .execute()
+            )
+            .data[0]
+            .get("companies")
+        )
+
+    async def update_skyscrapers(self, user_id: str, amount: int):
+        skyscrapers = await self.get_skyscrapers(user_id)
+        await self.supabase.table("users").update({"skyscrapers": skyscrapers + amount}).eq(
+            "id", user_id
+        ).execute()
+
+    async def get_skyscrapers(self, user_id: str):
+        return (
+            (
+                await self.supabase.table("users")
+                .select("skyscrapers")
+                .eq("id", user_id)
+                .execute()
+            )
+            .data[0]
+            .get("skyscrapers")
+        )
