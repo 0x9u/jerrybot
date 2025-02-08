@@ -11,7 +11,7 @@ from utils import slot_gamble
 import random
 from typing import Literal
 
-GAMBLING_LIMIT = 10_000_000
+GAMBLING_LIMIT = 10_000_000_000
 
 # todo: put checks in one function and use it for all commands
 
