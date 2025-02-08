@@ -132,6 +132,9 @@ class ItemCode(Enum):
     
     # Jerrymon
     JERRYMON_BALL = 89
+    FACTORY = 90
+    COMPANY = 91
+    SKYSCRAPER = 92
 
 
 loot_table_guns = {
@@ -312,12 +315,23 @@ async def job_lootbox(job_id: int) -> int:
     return await get_loot(lookup[job_id])
 
 
-ITEMS_PER_LEVEL_SLAVES_RATE = 150
-BASE_ITEMS_PER_LEVEL_SLAVES = 1000
-ITEMS_PER_LEVEL_FARMS_RATE = 25
+ITEMS_PER_LEVEL_SLAVES_RATE = 1500
+BASE_ITEMS_PER_LEVEL_SLAVES = 2000
+
+ITEMS_PER_LEVEL_FARMS_RATE = 250
 BASE_ITEMS_PER_LEVEL_FARMS = 100
-ITEMS_PER_LEVEL_MINES_RATE = 10
+
+ITEMS_PER_LEVEL_MINES_RATE = 150
 BASE_ITEMS_PER_LEVEL_MINES = 50
+
+ITEMS_PER_LEVEL_FACTORIES_RATE = 50
+BASE_ITEMS_PER_LEVEL_FACTORIES = 25
+
+ITEMS_PER_LEVEL_COMPANIES_RATE = 25
+BASE_ITEMS_PER_LEVEL_COMPANIES = 10
+
+ITEMS_PER_LEVEL_SKYSCRAPERS_RATE = 10
+BASE_ITEMS_PER_LEVEL_SKYSCRAPERS = 5
 
 MAX_BODYGUARDS = 10
 
@@ -355,12 +369,6 @@ async def handle_item_use(
     try:
         match code:
             case ItemCode.FARM.value:
-                slaves = await database.db.get_slaves(user_id)
-                if slaves < 100:
-                    await interaction.followup.send(
-                        "You need at least 100 slaves to use a farm"
-                    )
-                    return False
                 # calculate level required for farm
                 farm_amount = await database.db.get_farms(user_id)
                 amount_allowed = item_level_allowed(
@@ -379,12 +387,6 @@ async def handle_item_use(
                     return False
                 await database.db.update_farms(user_id, amount)
             case ItemCode.MINE.value:
-                slaves = await database.db.get_slaves(user_id)
-                if slaves < 150:
-                    await interaction.followup.send(
-                        "You need at least 150 slaves to use a mine"
-                    )
-                    return False
                 mine_amount = await database.db.get_mines(user_id)
                 amount_allowed = item_level_allowed(
                     BASE_ITEMS_PER_LEVEL_MINES,
@@ -536,6 +538,61 @@ async def handle_item_use(
                 )
                 
                 await user.send(embed=embed)
+            
+            case ItemCode.FACTORY.value:
+                factory_amount = await database.db.get_factories(user_id)
+                amount_allowed = item_level_allowed(
+                    BASE_ITEMS_PER_LEVEL_FACTORIES,
+                    ITEMS_PER_LEVEL_FACTORIES_RATE,
+                    await database.db.get_user_level(user_id),
+                )
+                total = factory_amount + amount
+                if total > amount_allowed:
+                    level_required = item_level_required(
+                        BASE_ITEMS_PER_LEVEL_FACTORIES, ITEMS_PER_LEVEL_FACTORIES_RATE, total
+                    )
+                    await interaction.followup.send(
+                        f"You need level {level_required} to have {total} factories"
+                    )
+                    return False
+                await database.db.update_factories(user_id, amount)
+            
+            case ItemCode.COMPANY.value:
+                company_amount = await database.db.get_companies(user_id)
+                amount_allowed = item_level_allowed(
+                    BASE_ITEMS_PER_LEVEL_COMPANIES,
+                    ITEMS_PER_LEVEL_COMPANIES_RATE,
+                    await database.db.get_user_level(user_id),
+                )
+                total = company_amount + amount
+                if total > amount_allowed:
+                    level_required = item_level_required(
+                        BASE_ITEMS_PER_LEVEL_COMPANIES, ITEMS_PER_LEVEL_COMPANIES_RATE, total
+                    )
+                    await interaction.followup.send(
+                        f"You need level {level_required} to have {total} companies"
+                    )
+                    return False
+                await database.db.update_companies(user_id, amount)
+            
+            case ItemCode.SKYSCRAPER.value:
+                skyscraper_amount = await database.db.get_skyscrapers(user_id)
+                amount_allowed = item_level_allowed(
+                    BASE_ITEMS_PER_LEVEL_SKYSCRAPERS,
+                    ITEMS_PER_LEVEL_SKYSCRAPERS_RATE,
+                    await database.db.get_user_level(user_id),
+                )
+                total = skyscraper_amount + amount
+                if total > amount_allowed:
+                    level_required = item_level_required(
+                        BASE_ITEMS_PER_LEVEL_SKYSCRAPERS, ITEMS_PER_LEVEL_SKYSCRAPERS_RATE, total
+                    )
+                    await interaction.followup.send(
+                        f"You need level {level_required} to have {total} skyscrapers"
+                    )
+                    return False
+                await database.db.update_skyscrapers(user_id, amount)
+                
 
             case _:
                 print("NO MATCH")
